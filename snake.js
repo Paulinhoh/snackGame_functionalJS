@@ -14,10 +14,12 @@ const pointEq = p1 => p2 => p1.x == p2.x && p1.y == p2.y
 
 // Funções de ações
 //verifica se a posição da cabeça da cobra é igual a posição da maçã
-const willEat   = state => pointEq(nextHead(state))(state.apple) 
+const willEat   = (state) => pointEq(nextHead(state))(state.apple) 
+
 
 //verifica se a posição da cabeça da cobra é a mesma posição de alguma parte do corpo
 const willCrash = state => state.snake.find(pointEq(nextHead(state))) 
+
 
 //Valida se a cobra está em movimentação
 const validMove = move => state =>
@@ -56,10 +58,23 @@ const rndPos = table => ({
   y: rnd(0)(table.rows - 1)
 })
 
+
+//FUNCAO CRIADAS
+//quando a cobra come alguma maçã, ele adiciona a sua pontuacao inicial mais 1
+const score = state => willEat(state) ? state['pont'] = state['pont'] + 1 : state['pont']
+
+///quando a cobra entra em colisão, ele vai resetar a sua pontuacao
+const resetScore = state => willCrash(state) ? state['pont'] = 0 : state['pont']
+
+const increase = state => willEat(state) ? state['velo'] = state['velo'] + 0.5 : state['velo']
+
+
 // Estado Inicial: Valores pré-definidos para os objetos que componham um estado
 const initialState = () => ({
   cols:  20,
   rows:  14,
+  pont: 0,
+  velo: 0,
   moves: [EAST],
   snake: [],
   apple: { x: 16, y: 2 },
@@ -69,9 +84,14 @@ const initialState = () => ({
 const next = spec({
   rows:  prop('rows'),
   cols:  prop('cols'),
+  pont:  prop('pont'),
+  velo:  prop('velo'),
   moves: nextMoves,
   snake: nextSnake,
-  apple: nextApple
+  apple: nextApple,
+  score: score,
+  resetScore: resetScore,
+  increase: increase,
 })
 
 /// Responsável para fazer a cobra se movimentar
