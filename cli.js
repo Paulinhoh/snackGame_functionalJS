@@ -3,19 +3,23 @@ const Snake    = require('./snake')
 const base     = require('./base')
 Object.getOwnPropertyNames(base).map(p => global[p] = base[p])
 
-// Estado é mutável
+/* Define a variável State como sendo mutável, o uso do let fere o princípio da imutabilidade da programação
+funcional*/
 let State = Snake.initialState()
 
 // Operações da matriz de jogo
 const Matrix = {
-  ///Desenhando o mapa
+  ///Função que desenha o mapa
   make:      table => rep(rep('.')(table.cols))(table.rows),
   set:       val   => pos => adjust(pos.y)(adjust(pos.x)(k(val))),
-  ///Desenhando a cobra
+  ///Função que desenha a cobra
   addSnake:  state => pipe(...map(Matrix.set('X'))(state.snake)),
 
-  ///Dsenhando uma maçã
+  ///Função que desenha a maçã
   addApple:  state => Matrix.set('o')(state.apple),
+
+  ///Função que desenha a maçã envenenada
+  addPoisonApple:  state => Matrix.set('O')(state.poisonapple),
   
   ///Quando ocorre uma colisão, ele deixa o mapa todo em #
   addCrash:  state => state.snake.length == 0 ? map(map(k('#'))) : id,
@@ -23,12 +27,13 @@ const Matrix = {
   ///Juntando todos os caracteres criados e montando no mapa
   toString:  xsxs  => xsxs.map(xs => xs.join(' ')).join('\r\n'),
 
-  ///Adicionando as funções criadas
+  ///Compondo as funções criadas
   fromState: state => pipe(
     Matrix.make,
     Matrix.addSnake(state),
     Matrix.addApple(state),
     Matrix.addCrash(state),
+    Matrix.addPoisonApple(state),
   )(state)
 }
 
@@ -78,4 +83,5 @@ setInterval(() => { step(); show(); },  0 + vel(0)) //vel(1) to vel(5); default 
 
 setInterval(() => { step(); show(); },  0 + vel(Snake.next(State).increase))
 
-
+/*A Função next foi usada mesmo sem estar definida aqui, isso mostra que ela possui o princípio de closure,
+pois foi executada mesmo estando fora do seu escopo léxico*/

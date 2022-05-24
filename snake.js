@@ -1,4 +1,10 @@
-/// Chamando o arquivo basejs para poder utilizar suas funções
+/*Membros da Equipe A (Turma 01): 
+ALYSON SOUZA CARREGOSA
+JOSE ADELSON LIMA SANTOS JUNIOR
+MARCOS BARBOSA MIRANDA
+PAULO HENRIQUE DOS SANTOS REIS */
+
+// Chamando o arquivo basejs para poder utilizar suas funções
 const base = require('./base')
 
 Object.getOwnPropertyNames(base).map(p => global[p] = base[p])
@@ -14,12 +20,13 @@ const pointEq = p1 => p2 => p1.x == p2.x && p1.y == p2.y
 
 // Funções de ações
 //verifica se a posição da cabeça da cobra é igual a posição da maçã
-const willEat   = (state) => pointEq(nextHead(state))(state.apple) 
+const willEat   = (state) => pointEq(nextHead(state))(state.apple)
 
+//verifica se a posição da cabeça da cobra é igual a posição da maçã venenosa
+const willPoisonEat = (state) => pointEq(nextHead(state))(state.poisonapple) 
 
 //verifica se a posição da cabeça da cobra é a mesma posição de alguma parte do corpo
 const willCrash = state => state.snake.find(pointEq(nextHead(state))) 
-
 
 //Valida se a cobra está em movimentação
 const validMove = move => state =>
@@ -29,10 +36,13 @@ const validMove = move => state =>
 // gerando as proximas movimentações da cobra, ou seja, sempre percorrendo a lista de movimentação
 const nextMoves = state => state.moves.length > 1 ? dropFirst(state.moves) : state.moves
 
-///Caso a cobra coma a maçã atual, ele gera uma nova maçã em uma diferente posição, caso contrário, ela permanece na mesma posição
+//Caso a cobra coma a maçã atual, ele gera uma nova maçã em uma diferente posição, caso contrário, ela permanece na mesma posição
 const nextApple = state => willEat(state) ? rndPos(state) : state.apple
 
-///Verificando onde ta á nova posição da cabeça da cobra
+//Caso a cobra coma a maçã atual, ele gera uma nova maçã venenosa em uma diferente posição, caso contrário, ela permanece na mesma posição
+const nextPoisonApple = state => willEat(state) ? rndPos(state) : state.poisonapple
+
+//Verificando onde ta á nova posição da cabeça da cobra através do tamanho dela
 const nextHead  = state => state.snake.length == 0
   ? { x: 2, y: 2 }
   : {
@@ -40,16 +50,21 @@ const nextHead  = state => state.snake.length == 0
     y: mod(state.rows)(state.snake[0].y + state.moves[0].y)
   }
 
-///Verificando uma próxima cobra
-const nextSnake = state => willCrash(state)
-  //caso tenha uma colisão, você perdeu o jogo
-  ? []
-  //depois verifica se comeu alguma maçã
-  : (willEat(state)
-    //a cobra vai aumentar
-    ? [nextHead(state)].concat(state.snake)
-    //aqui ele sempre vai diminuindo a ultima parte da cobra, ou seja, para não adicionar
-    : [nextHead(state)].concat(dropLast(state.snake)))
+//Verificando uma próxima cobra
+const nextSnake = state => {
+  //uma condicional caso a cobra acabe colidindo ela retorna uma lista vazia, finalizando o jogo
+  if (willCrash(state))
+   return []
+  //uma condição para caso a cobra coma a maçã, ela cresça de tamanho
+  else if (willEat(state))
+   return [nextHead(state)].concat(state.snake)
+  //outra condição para caso a cobra coma a maçã venenosa, o jogo finalize
+  else if (willPoisonEat(state))
+   return []
+  //aqui ele sempre vai diminuindo a última parte da cobra, ou seja, para não adicionar
+  else
+   return [nextHead(state)].concat(dropLast(state.snake))
+}
 
 // Aleatoriedade
 //gera posições de x e y aleatórios dentro do range do mapa (linhas e colunas)
@@ -59,15 +74,15 @@ const rndPos = table => ({
 })
 
 
-//FUNCAO CRIADAS
-//quando a cobra come alguma maçã, ele adiciona a sua pontuacao inicial mais 1
-const score = state => willEat(state) ? state['pont'] = state['pont'] + 1 : state['pont']
+//FUNCÕES CRIADAS
+//quando a cobra come alguma maçã, ele adiciona a sua pontuacao inicial mais 1, mas caso ele coma a maçã venenosa vai resetar a pontuação
+const score = state => willEat(state) ? state['pont'] = state['pont'] + 1 : willPoisonEat(state) ? state['pont'] = 0 : state['pont']
 
-///quando a cobra entra em colisão, ele vai resetar a sua pontuacao
+//quando a cobra entra em colisão, ele vai resetar a sua pontuacao
 const resetScore = state => willCrash(state) ? state['pont'] = 0 : state['pont']
 
+//quando a cobra come maçã, a velocidade dela é aumentada
 const increase = state => willEat(state) ? state['velo'] = state['velo'] + 0.5 : state['velo']
-
 
 // Estado Inicial: Valores pré-definidos para os objetos que componham um estado
 const initialState = () => ({
@@ -78,6 +93,7 @@ const initialState = () => ({
   moves: [EAST],
   snake: [],
   apple: { x: 16, y: 2 },
+  poisonapple: { x: 14, y: 5 },
 })
 
 //Atualizando todos os objetos do jogo de acordo com o tempo e ocorrência de eventos
@@ -92,9 +108,10 @@ const next = spec({
   score: score,
   resetScore: resetScore,
   increase: increase,
+  poisonapple: nextPoisonApple,
 })
 
-/// Responsável para fazer a cobra se movimentar
+// Responsável para fazer a cobra se movimentar
 const enqueue = (state, move) => validMove(move)(state)
   ? 
   //caso a movimentação seja válida, ele copia suas propriedades para um novo objeto
@@ -102,5 +119,5 @@ const enqueue = (state, move) => validMove(move)(state)
   //caso a movimentação não seja válida, ele não altera o estado
   : state
 
-/// Expotando as funções
+// Exportando as funções
 module.exports = { EAST, NORTH, SOUTH, WEST, initialState, enqueue, next, }
