@@ -81,9 +81,6 @@ const score = state => willEat(state) ? state['pont'] = state['pont'] + 1 : will
 //quando a cobra entra em colisão, ele vai resetar a sua pontuacao
 const resetScore = state => willCrash(state) ? state['pont'] = 0 : state['pont']
 
-//quando a cobra come maçã, a velocidade dela é aumentada
-const increase = state => willEat(state) ? state['velo'] = state['velo'] + 0.5 : state['velo']
-
 // Estado Inicial: Valores pré-definidos para os objetos que componham um estado
 const initialState = () => ({
   cols:  20,
@@ -107,7 +104,6 @@ const next = spec({
   apple: nextApple,
   score: score,
   resetScore: resetScore,
-  increase: increase,
   poisonapple: nextPoisonApple,
 })
 

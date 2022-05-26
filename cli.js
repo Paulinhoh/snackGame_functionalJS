@@ -19,7 +19,7 @@ const Matrix = {
   addApple:  state => Matrix.set('o')(state.apple),
 
   ///Função que desenha a maçã envenenada
-  addPoisonApple:  state => Matrix.set('O')(state.poisonapple),
+  addPoisonApple:  state => Matrix.set('o')(state.poisonapple),
   
   ///Quando ocorre uma colisão, ele deixa o mapa todo em #
   addCrash:  state => state.snake.length == 0 ? map(map(k('#'))) : id,
@@ -58,7 +58,7 @@ process.stdin.on('keypress', (str, key) => {
  */
 ///Exibindo uma
 /// exibindo o mapa no terminal 
-const show = () => console.log('\x1Bc' + Matrix.toString(Matrix.fromState(State)) + '\n Sua pontuação: '+Snake.next(State).score)
+const show = () => console.log('\x1Bc' + Matrix.toString(Matrix.fromState(State)) + '\n Score: '+Snake.next(State).score)
 /// Atribuindo os próximos passos para a cobra
 const step = () => State = Snake.next(State)
 
@@ -78,10 +78,8 @@ const vel = (v=3) => {
 }
 
 ///Definindo a velocidade da cobra
-setInterval(() => { step(); show(); },  0 + vel(0)) //vel(1) to vel(5); default = vel(3)
+setInterval(() => { step(); show(); }, vel(4)) //vel(1) to vel(5); default = vel(3)
 
-
-setInterval(() => { step(); show(); },  0 + vel(Snake.next(State).increase))
 
 /*A Função next foi usada mesmo sem estar definida aqui, isso mostra que ela possui o princípio de closure,
 pois foi executada mesmo estando fora do seu escopo léxico*/
